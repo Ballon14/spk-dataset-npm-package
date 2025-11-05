@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+env/
+.venv/
+ENV/
+build/
+dist/
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+# VSCode, PyCharm, Editor tools
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Data
+*.sqlite3
+*.db
+*.log
+data.csv
+
+# Env
+.env
+.env.*
+
+# Mac/Linux
+*.DS_Store
+
+# Backup
+*~

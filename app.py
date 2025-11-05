@@ -34,13 +34,33 @@ def show_dataset():
 def statistik():
     df = load_csv()
     categories_counter = Counter()
+    # Hitung total download last month
+    if 'downloads_last_month' in df.columns:
+        total_download_last_month = df['downloads_last_month'].fillna(0).sum()
+        # Top 10 package download terbanyak
+        top_downloaded_packages = (
+            df[['name','downloads_last_month']]
+            .dropna(subset=['downloads_last_month'])
+            .sort_values('downloads_last_month', ascending=False)
+            .head(10)
+            .to_dict(orient='records')
+        )
+    else:
+        total_download_last_month = 0
+        top_downloaded_packages = []
     for cat_raw in df['categories'].dropna():
         splits = [x.strip() for x in re.split(r'[;,|]', str(cat_raw)) if x.strip()]
         for cat in splits:
             categories_counter[cat.lower()] += 1
     categories_stats = categories_counter.most_common()
     total_dataset = sum(categories_counter.values())
-    return render_template('statistik.html', categories_stats=categories_stats, total_dataset=total_dataset)
+    return render_template(
+        'statistik.html',
+        categories_stats=categories_stats,
+        total_dataset=total_dataset,
+        total_download_last_month=total_download_last_month,
+        top_downloaded_packages=top_downloaded_packages
+    )
 
 @app.route('/kategori/<nama_kategori>')
 def kategori_detail(nama_kategori):
