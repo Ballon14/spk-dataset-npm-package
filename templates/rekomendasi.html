@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Rekomendasi Package Project{% endblock %}
+{% block content %}
+    <div class="gradient-bg py-8 shadow-xl mb-8 animate-slide-in">
+        <div class="max-w-3xl mx-auto px-4">
+            <h1 class="text-center text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
+                💡 Rekomendasi Package Project
+            </h1>
+            <p class="text-center text-purple-100 text-sm md:text-base">
+                Pilih jenis project untuk mendapatkan rekomendasi package terbaik beserta alternatifnya.
+            </p>
+        </div>
+    </div>
+    <div class="max-w-xl mx-auto px-4 animate-slide-in">
+        <div class="glass-effect rounded-2xl shadow-xl p-6 mb-8">
+            <form method="GET" action="" class="flex flex-col gap-4">
+                <label class="font-bold text-purple-800">Pilih Kategori Project</label>
+                <select name="kategori" id="kategori" class="px-4 py-3 rounded-lg border-2 border-purple-300 focus:outline-none focus:border-purple-500 font-semibold" onchange="this.form.submit()">
+                    <option value="">-- Pilih kategori project --</option>
+                    {% for kategori in kategori_list %}
+                        <option value="{{ kategori }}" {% if kategori==kategori_terpilih %}selected{% endif %}>{{ kategori }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        {% if rekomendasi_data %}
+        <div class="glass-effect rounded-2xl shadow-xl p-6 animate-slide-in">
+            <h2 class="text-xl text-purple-900 font-bold mb-4 text-center">Rekomendasi untuk <span class="text-blue-700">{{ kategori_terpilih }}</span></h2>
+            <div class="mb-6">
+                <b class="block text-purple-700 mb-2">Package Utama:</b>
+                <div class="bg-blue-50 border-l-4 border-blue-400 px-4 py-3 rounded shadow mb-3">
+                    <a href="/package/{{ rekomendasi_data.utama.name | urlencode }}" class="font-semibold text-blue-900 text-lg underline hover:text-purple-700">{{ rekomendasi_data.utama.name }}</a>
+                    <div class="text-gray-600 mb-1">{{ rekomendasi_data.utama.description }}</div>
+                    <div class="text-sm text-gray-700">Downloads (last month): <span class="font-bold text-purple-800">{{ rekomendasi_data.utama.downloads_last_month | int }}</span></div>
+                    <div class="text-sm text-gray-700">Author: <span class="font-semibold">{{ rekomendasi_data.utama.author }}</span></div>
+                    {% if rekomendasi_data.utama.repository %}
+                    <div class="text-sm"><a class="text-blue-700 underline" href="{{ rekomendasi_data.utama.repository }}" target="_blank">Repository</a></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if rekomendasi_data.alternatif %}
+            <div>
+                <div class="font-semibold text-purple-800 mb-2">Alternatif Lain:</div>
+                <ul class="list-disc ml-6">
+                {% for alt in rekomendasi_data.alternatif %}
+                    <li>
+                        <a href="/package/{{ alt.name | urlencode }}" class="text-blue-800 font-semibold underline hover:text-purple-700">{{ alt.name }}</a>
+                        <span class="text-gray-600">- {{ alt.description }}</span><br/>
+                        <span class="text-xs text-gray-500">Downloads: {{ alt.downloads_last_month | int }}</span> |
+                        <span class="text-xs text-gray-500">Author: {{ alt.author }}</span>
+                        {% if alt.repository %}
+                        | <a href="{{ alt.repository }}" target="_blank" class="text-blue-700 underline">Repo</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% elif kategori_terpilih is not defined or not kategori_terpilih %}
+            <div class="glass-effect rounded-2xl shadow-md p-6 text-purple-800 mt-4 text-center font-semibold">Silakan pilih kategori project di atas untuk melihat rekomendasi package.</div>
+        {% else %}
+            <div class="glass-effect rounded-2xl shadow-md p-6 mt-4 text-center text-red-600 font-semibold">Tidak ditemukan package di kategori <b>{{ kategori_terpilih }}</b></div>
+        {% endif %}
+    </div>
+{% endblock %}

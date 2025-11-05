@@ -10,6 +10,38 @@ CSV_PATH = '/home/iqbal/project/py/dataset/data.csv'
 PAGE_SIZE = 20
 SEARCH_COLUMNS = ['name', 'description', 'author', 'keywords', 'categories', 'repository', 'homepage']
 
+# Struktur data rekomendasi, akan dipakai di halaman rekomendasi
+PACKAGE_RECOMMENDATIONS = {
+    "Website": {
+        "main": {"name": "Django", "desc": "Web framework powerful, full-featured, cocok untuk project besar & kecil."},
+        "alternatives": [
+            {"name": "Flask", "desc": "Microframework ringan dan fleksibel."},
+            {"name": "FastAPI", "desc": "Modern, cepat, unggul untuk API."}
+        ]
+    },
+    "API": {
+        "main": {"name": "FastAPI", "desc": "Framework modern dan sangat cepat untuk building API."},
+        "alternatives": [
+            {"name": "Flask", "desc": "Popular, simple, mudah dipelajari."}
+        ]
+    },
+    "Data Science": {
+        "main": {"name": "pandas", "desc": "Library powerful untuk data analysis."},
+        "alternatives": [
+            {"name": "numpy", "desc": "Support komputasi numerik."},
+            {"name": "dask", "desc": "Pemrosesan data besar."}
+        ]
+    },
+    "Machine Learning": {
+        "main": {"name": "scikit-learn", "desc": "Library ML umum, mudah digunakan untuk berbagai algoritma."},
+        "alternatives": [
+            {"name": "TensorFlow", "desc": "Powerful, scalable untuk deep learning."},
+            {"name": "PyTorch", "desc": "Populer untuk riset & aplikasi deep learning."}
+        ]
+    },
+    # Tambahkan kategori lain sesuai kebutuhan
+}
+
 def load_csv():
     return pd.read_csv(CSV_PATH)
 
@@ -77,6 +109,52 @@ def kategori_detail(nama_kategori):
     total_pages = max(1, math.ceil(total_data / PAGE_SIZE))
     data = df_cat.iloc[(page-1)*PAGE_SIZE : page*PAGE_SIZE].to_dict(orient='records')
     return render_template('dataset.html', data=data, page=page, total_pages=total_pages, q='', filter_category=nama_kategori_decoded)
+
+@app.route('/rekomendasi')
+def rekomendasi():
+    import pandas as pd  # Local import supaya cepat reload
+    kategori = request.args.get('kategori', type=str)
+    df = load_csv()
+    # Ambil semua kategori unik (split, normalisasi, sort)
+    cat_set = set()
+    for catlist in df['categories'].dropna():
+        for cat in [x.strip() for x in str(catlist).split(',') if x.strip()]:
+            cat_set.add(cat)
+    kategori_list = sorted(cat_set)
+    rekomendasi_data = None
+    if kategori:
+        # Cari semua baris yang categories-nya memuat kategori tsb (case insensitive)
+        mask = df['categories'].apply(lambda x: kategori.lower() in str(x).lower() if pd.notnull(x) else False)
+        dfcat = df[mask]
+        # Urutkan berdasarkan downloads_last_month (desc), null jd 0
+        dfcat['downloads_last_month'] = pd.to_numeric(dfcat['downloads_last_month'], errors='coerce').fillna(0)
+        top = dfcat.sort_values('downloads_last_month', ascending=False).head(4)
+        packages = top.to_dict(orient='records')
+        if packages:
+            rekomendasi_data = {
+                'utama': packages[0],
+                'alternatif': packages[1:] if len(packages) > 1 else []
+            }
+    return render_template(
+        'rekomendasi.html',
+        kategori_list=kategori_list,
+        kategori_terpilih=kategori,
+        rekomendasi_data=rekomendasi_data
+    )
+
+@app.route('/package/<path:name>')
+def detail_package(name):
+    import pandas as pd
+    # decode jika pakai spasi/encode url
+    from urllib.parse import unquote
+    name_dec = unquote(name)
+    df = load_csv()
+    # Filter persis nama package
+    pkgrow = df[df['name'] == name_dec]
+    if pkgrow.empty:
+        return render_template('detail_package.html', package=None, name=name_dec)
+    pkg = pkgrow.iloc[0].to_dict()
+    return render_template('detail_package.html', package=pkg, name=name_dec)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

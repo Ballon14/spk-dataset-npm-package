@@ -1,203 +1,162 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Dataset Table</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            @keyframes slideIn {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .animate-slide-in { animation: slideIn 0.3s ease-out; }
-            .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-            .glass-effect { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
-            .table-row-hover:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-            .search-input:focus { box-shadow: 0 0 0 3px rgba(102,126,234,0.3); }
-            .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s ease; }
-            .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102,126,234,0.4); }
-            .pagination-btn { transition: all 0.2s ease; }
-            .pagination-btn:hover { transform: translateY(-2px); }
-        </style>
-    </head>
-    <body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen">
-        <!-- Navbar -->
-        <div class="gradient-bg px-0 md:px-6 py-3 shadow-xl">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center gap-4 text-white text-lg font-bold">
-                    <a href="/" class="hover:underline flex items-center gap-1">
-                        <span>📊</span> Dataset
-                    </a>
-                    <span class="mx-1 opacity-40">|</span>
-                    <a href="/statistik" class="hover:underline flex items-center gap-1">
-                        <span>📈</span> Statistik
-                    </a>
+{% extends 'base.html' %}
+{% block title %}Dataset Table{% endblock %}
+{% block content %}
+    <div class="gradient-bg py-8 shadow-xl mb-8 animate-slide-in">
+        <div class="max-w-7xl mx-auto px-4">
+            <h1 class="text-center text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
+                📊 Daftar Dataset
+            </h1>
+            <p class="text-center text-purple-100 text-sm md:text-base">
+                Kelola dataset npm packages
+            </p>
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto mb-8 px-4 animate-slide-in">
+        <div class="glass-effect rounded-2xl shadow-xl p-6">
+            <form method="get" action="/" class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+                <div class="flex-1 relative">
+                    <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ q|default('') }}" 
+                        placeholder="Cari berdasarkan nama, deskripsi, author..." 
+                        class="search-input w-full pl-12 pr-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-400 transition-all"
+                    />
                 </div>
-                <span class="text-xs text-purple-100">Aplikasi Data</span>
+                <button 
+                    type="submit" 
+                    class="btn-primary px-8 py-3 text-white rounded-xl font-semibold shadow-lg"
+                >
+                    🔍 Cari
+                </button>
+            </form>
+            {% if q %}
+            <div class="mt-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl p-3">
+                <div class="flex items-center gap-2 text-sm text-gray-700">
+                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Hasil pencarian untuk: <strong class="text-blue-700">"{{ q }}"</strong></span>
+                </div>
+                <a href="/" class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Reset
+                </a>
             </div>
+            {% endif %}
         </div>
-        <!-- Header -->
-        <div class="gradient-bg py-8 shadow-xl mb-8 animate-slide-in">
-            <div class="max-w-7xl mx-auto px-4">
-                <h1 class="text-center text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
-                    📊 Daftar Dataset
-                </h1>
-                <p class="text-center text-purple-100 text-sm md:text-base">
-                    Kelola dataset npm packages
-                </p>
+    </div>
+    {% if filter_category %}
+    <div class="mb-4 max-w-2xl mx-auto px-4">
+        <div class="flex items-center justify-between bg-blue-50 border-l-4 border-blue-400 rounded-xl p-4 shadow">
+            <div class="flex items-center gap-2 text-base text-blue-800 font-semibold">
+                <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h4m0 0V7m0 4h-4"></path></svg>
+                Menampilkan dataset untuk kategori:
+                <span class="ml-1 px-2 py-1 bg-blue-200 text-blue-800 rounded">{{ filter_category|capitalize }}</span>
             </div>
+            <a href="/statistik" class="ml-5 text-xs px-4 py-2 rounded-xl bg-blue-200 text-blue-800 hover:bg-blue-400 transition font-bold">← Kembali Statistik</a>
         </div>
-        <!-- Search Section -->
-        <div class="max-w-7xl mx-auto mb-8 px-4 animate-slide-in">
-            <div class="glass-effect rounded-2xl shadow-xl p-6">
-                <form method="get" action="/" class="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-                    <div class="flex-1 relative">
-                        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <input 
-                            type="text" 
-                            name="q" 
-                            value="{{ q|default('') }}" 
-                            placeholder="Cari berdasarkan nama, deskripsi, author..." 
-                            class="search-input w-full pl-12 pr-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-400 transition-all"
-                        />
-                    </div>
-                    <button 
-                        type="submit" 
-                        class="btn-primary px-8 py-3 text-white rounded-xl font-semibold shadow-lg"
-                    >
-                        🔍 Cari
-                    </button>
-                </form>
-                {% if q %}
-                <div class="mt-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl p-3">
-                    <div class="flex items-center gap-2 text-sm text-gray-700">
-                        <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+    </div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 pb-8 animate-slide-in">
+        <div class="glass-effect rounded-2xl shadow-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-[900px] w-full text-sm">
+                    <thead>
+                        <tr class="gradient-bg text-white">
+                            <th class="py-4 px-4 font-bold sticky left-0 gradient-bg z-10 text-left">
+                                #
+                            </th>
+                            {% if data and data[0] %}
+                            {% for col in data[0].keys() %}
+                            <th class="py-4 px-4 font-bold text-left">
+                                {{ col }}
+                            </th>
+                            {% endfor %}
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr class="table-row-hover border-b border-gray-100 {% if loop.index0 % 2 == 0 %}bg-white{% else %}bg-purple-50/30{% endif %} transition-all duration-200">
+                            <td class="py-4 px-4 sticky left-0 bg-inherit font-semibold text-purple-600">
+                                {{ (page-1)*20 + loop.index }}
+                            </td>
+                            {% for col, value in row.items() %}
+                            {% set valstr = value|string %}
+                            <td class="py-4 px-4 text-gray-700 whitespace-pre-line break-words max-w-xs">
+                                {% if col in ['repository', 'npm_url', 'homepage'] and valstr and valstr|length > 3 %}
+                                <a href="{{ valstr }}" class="text-blue-700 hover:underline break-all flex items-center gap-1" target="_blank" rel="noopener noreferrer">
+                                    <svg class="w-4 h-4 inline-block mb-0.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14a4 4 0 11-5.657-5.657L17 3z"/></svg>
+                                    {{ valstr.split('//')[-1] if '://' in valstr else valstr }}
+                                </a>
+                                {% elif valstr %}
+                                {{ valstr }}
+                                {% else %}-{% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-3 bg-gradient-to-r from-purple-50 to-blue-50 border-t border-purple-100">
+                <div class="flex items-center justify-between text-xs text-gray-600">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                         </svg>
-                        <span>Hasil pencarian untuk: <strong class="text-blue-700">"{{ q }}"</strong></span>
-                    </div>
-                    <a href="/" class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Reset
+                        Geser ke samping untuk melihat lebih banyak kolom
+                    </span>
+                    <span class="font-medium text-purple-700">
+                        Total: {{ data|length }} item
+                    </span>
+                </div>
+            </div>
+            {% if total_pages > 1 %}
+            <div class="px-6 py-6 bg-white border-t border-gray-200">
+                <div class="flex flex-wrap items-center justify-center gap-2 select-none">
+                    <a 
+                        href="?page={{page-1}}{{'&q='+q if q}}" 
+                        class="pagination-btn px-4 py-2 rounded-lg border-2 font-medium shadow-sm {{ 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' if page == 1 else 'border-purple-300 bg-white text-purple-700 hover:bg-purple-50 hover:border-purple-400' }}"
+                        {% if page == 1 %}aria-disabled="true" tabindex="-1"{% endif %}
+                    >
+                        ← Previous
+                    </a>
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == page %}
+                            <span class="pagination-btn px-4 py-2 rounded-lg border-2 border-purple-600 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow-lg">
+                                {{ p }}
+                            </span>
+                        {% elif p == 1 or p == total_pages or (p >= page-2 and p <= page+2) %}
+                            <a 
+                                href="?page={{p}}{{'&q='+q if q}}" 
+                                class="pagination-btn px-4 py-2 rounded-lg border-2 border-purple-200 bg-white text-purple-700 font-medium hover:bg-purple-50 hover:border-purple-400 shadow-sm"
+                            >
+                                {{ p }}
+                            </a>
+                        {% elif p == page - 3 or p == page + 3 %}
+                            <span class="px-2 text-gray-400">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    <a 
+                        href="?page={{page+1}}{{'&q='+q if q}}" 
+                        class="pagination-btn px-4 py-2 rounded-lg border-2 font-medium shadow-sm {{ 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' if page == total_pages else 'border-purple-300 bg-white text-purple-700 hover:bg-purple-50 hover:border-purple-400' }}"
+                        {% if page == total_pages %}aria-disabled="true" tabindex="-1"{% endif %}
+                    >
+                        Next →
                     </a>
                 </div>
-                {% endif %}
+                <div class="text-center mt-4 text-sm text-gray-600">
+                    Halaman <strong class="text-purple-700">{{ page }}</strong> dari <strong class="text-purple-700">{{ total_pages }}</strong>
+                </div>
             </div>
+            {% endif %}
         </div>
-        {% if filter_category %}
-        <div class="mb-4 max-w-2xl mx-auto px-4">
-            <div class="flex items-center justify-between bg-blue-50 border-l-4 border-blue-400 rounded-xl p-4 shadow">
-                <div class="flex items-center gap-2 text-base text-blue-800 font-semibold">
-                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h4m0 0V7m0 4h-4"></path></svg>
-                    Menampilkan dataset untuk kategori:
-                    <span class="ml-1 px-2 py-1 bg-blue-200 text-blue-800 rounded">{{ filter_category|capitalize }}</span>
-                </div>
-                <a href="/statistik" class="ml-5 text-xs px-4 py-2 rounded-xl bg-blue-200 text-blue-800 hover:bg-blue-400 transition font-bold">← Kembali Statistik</a>
-            </div>
-        </div>
-        {% endif %}
-        <!-- Table Section -->
-        <div class="max-w-7xl mx-auto px-4 pb-8 animate-slide-in">
-            <div class="glass-effect rounded-2xl shadow-2xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-[900px] w-full text-sm">
-                        <thead>
-                            <tr class="gradient-bg text-white">
-                                <th class="py-4 px-4 font-bold sticky left-0 gradient-bg z-10 text-left">
-                                    #
-                                </th>
-                                {% if data and data[0] %}
-                                {% for col in data[0].keys() %}
-                                <th class="py-4 px-4 font-bold text-left">
-                                    {{ col }}
-                                </th>
-                                {% endfor %}
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in data %}
-                            <tr class="table-row-hover border-b border-gray-100 {% if loop.index0 % 2 == 0 %}bg-white{% else %}bg-purple-50/30{% endif %} transition-all duration-200">
-                                <td class="py-4 px-4 sticky left-0 bg-inherit font-semibold text-purple-600">
-                                    {{ (page-1)*20 + loop.index }}
-                                </td>
-                                {% for col, value in row.items() %}
-                                {% set valstr = value|string %}
-                                <td class="py-4 px-4 text-gray-700 whitespace-pre-line break-words max-w-xs">
-                                    {% if col in ['repository', 'npm_url', 'homepage'] and valstr and valstr|length > 3 %}
-                                    <a href="{{ valstr }}" class="text-blue-700 hover:underline break-all flex items-center gap-1" target="_blank" rel="noopener noreferrer">
-                                        <svg class="w-4 h-4 inline-block mb-0.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14a4 4 0 11-5.657-5.657L17 3z"/></svg>
-                                        {{ valstr.split('//')[-1] if '://' in valstr else valstr }}
-                                    </a>
-                                    {% elif valstr %}
-                                    {{ valstr }}
-                                    {% else %}-{% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="px-6 py-3 bg-gradient-to-r from-purple-50 to-blue-50 border-t border-purple-100">
-                    <div class="flex items-center justify-between text-xs text-gray-600">
-                        <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                            </svg>
-                            Geser ke samping untuk melihat lebih banyak kolom
-                        </span>
-                        <span class="font-medium text-purple-700">
-                            Total: {{ data|length }} item
-                        </span>
-                    </div>
-                </div>
-                <!-- Pagination -->
-                {% if total_pages > 1 %}
-                <div class="px-6 py-6 bg-white border-t border-gray-200">
-                    <div class="flex flex-wrap items-center justify-center gap-2 select-none">
-                        <a 
-                            href="?page={{page-1}}{{'&q='+q if q}}" 
-                            class="pagination-btn px-4 py-2 rounded-lg border-2 font-medium shadow-sm {{ 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' if page == 1 else 'border-purple-300 bg-white text-purple-700 hover:bg-purple-50 hover:border-purple-400' }}"
-                            {% if page == 1 %}aria-disabled="true" tabindex="-1"{% endif %}
-                        >
-                            ← Previous
-                        </a>
-                        {% for p in range(1, total_pages + 1) %}
-                            {% if p == page %}
-                                <span class="pagination-btn px-4 py-2 rounded-lg border-2 border-purple-600 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow-lg">
-                                    {{ p }}
-                                </span>
-                            {% elif p == 1 or p == total_pages or (p >= page-2 and p <= page+2) %}
-                                <a 
-                                    href="?page={{p}}{{'&q='+q if q}}" 
-                                    class="pagination-btn px-4 py-2 rounded-lg border-2 border-purple-200 bg-white text-purple-700 font-medium hover:bg-purple-50 hover:border-purple-400 shadow-sm"
-                                >
-                                    {{ p }}
-                                </a>
-                            {% elif p == page - 3 or p == page + 3 %}
-                                <span class="px-2 text-gray-400">...</span>
-                            {% endif %}
-                        {% endfor %}
-                        <a 
-                            href="?page={{page+1}}{{'&q='+q if q}}" 
-                            class="pagination-btn px-4 py-2 rounded-lg border-2 font-medium shadow-sm {{ 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' if page == total_pages else 'border-purple-300 bg-white text-purple-700 hover:bg-purple-50 hover:border-purple-400' }}"
-                            {% if page == total_pages %}aria-disabled="true" tabindex="-1"{% endif %}
-                        >
-                            Next →
-                        </a>
-                    </div>
-                    <div class="text-center mt-4 text-sm text-gray-600">
-                        Halaman <strong class="text-purple-700">{{ page }}</strong> dari <strong class="text-purple-700">{{ total_pages }}</strong>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </body>
-</html>
+    </div>
+{% endblock %}
